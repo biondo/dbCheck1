@@ -28,13 +28,19 @@ Route::group([
     Route::get('me', 'AuthController@me');
 });
 */
+
+Route::group(['middleware' => 'cors'], function () {
+
+//Route::get('client', 'ClientController@index');
+
 Route::post('logout', 'AuthController@logout');
 Route::post('auth/login', 'AuthController@login');
 Route::group(['middleware' => 'jwt'], function () {
     // Protected routes
-
     Route::resource('client', 'ClientController', ['except' =>['create', 'edit']]);
     Route::resource('project', 'ProjectsController', ['except' => ['create', 'edit']]);
+    Route::resource('user', 'UserController', ['except' => ['create', 'edit']]);
+    //Route::get('user', 'UserController@index');
 
     Route::group(['prefix'=>'project'], function(){
 
@@ -48,4 +54,5 @@ Route::group(['middleware' => 'jwt'], function () {
 
     });
 
+});
 });

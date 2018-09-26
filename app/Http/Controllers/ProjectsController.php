@@ -50,8 +50,8 @@ class ProjectsController extends Controller
     {
         $this->repository->pushCriteria(app('Prettus\Repository\Criteria\RequestCriteria'));
         //Só retorna os projetos relacionados ao usuario logado.
-       // $projects = $this->repository->findWhere(['owner_id' => auth()->user()->getAuthIdentifier()]);
-        $projects = $this->repository->all();
+        $projects = $this->repository->findWhere(['owner_id' => auth()->user()->getAuthIdentifier()]);
+        //$projects = $this->repository->all();
         if (request()->wantsJson()) {
 
             return response()->json([
@@ -112,19 +112,13 @@ class ProjectsController extends Controller
      */
     public function show($id)
     {
-
-        $project = $this->repository->find($id);
-
-        if (request()->wantsJson()) {
-
-            return response()->json([
-                'data' => $project,
-            ]);
+        $userId = auth()->user()->getAuthIdentifier();
+        if($this->repository->isOwner($id, $userId) == false)
+        {
+            return ['message' => false];
         }
+        return $this->repository->find($id);
 
-        return $project;
-
-            //view('projects.show', compact('project'));
     }
 
     /**
@@ -209,7 +203,7 @@ class ProjectsController extends Controller
        return $this->repository->delete($id);
     }
 
-    /*private function CheckProjectOwner($projectId){
+    private function CheckProjectOwner($projectId){
         $userId = auth()->user()->getAuthIdentifier();
         return $this->repository->isOwner($projectId, $userId);
     }
@@ -225,5 +219,5 @@ class ProjectsController extends Controller
         }
         return false;
     }
-*/
+
 }

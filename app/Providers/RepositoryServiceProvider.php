@@ -23,8 +23,18 @@ class RepositoryServiceProvider extends ServiceProvider
      */
     public function register()
     {
-        $this->app->bind(\DoubleCheck\Repositories\ProjectRepository::class, \DoubleCheck\Repositories\ProjectRepositoryEloquent::class);
-        $this->app->bind(\DoubleCheck\Repositories\ProjectNoteRepository::class, \DoubleCheck\Repositories\ProjectNoteRepositoryEloquent::class);
+        $this->app->bind(
+            \DoubleCheck\Repositories\ProjectRepository::class,
+            \DoubleCheck\Repositories\ProjectRepositoryEloquent::class
+        );
+        $this->app->bind(
+            \DoubleCheck\Repositories\ProjectNoteRepository::class,
+            \DoubleCheck\Repositories\ProjectNoteRepositoryEloquent::class
+        );
+        $this->app->bind(
+            \DoubleCheck\Repositories\UserRepository::class,
+            \DoubleCheck\Repositories\UserRepositoryEloquent::class
+        );
         //:end-bindings:
     }
 }
