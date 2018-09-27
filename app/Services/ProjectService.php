@@ -9,6 +9,7 @@
 namespace DoubleCheck\Services;
 
 
+use Carbon\Carbon;
 use DoubleCheck\Repositories\ProjectRepository;
 use DoubleCheck\Validators\ProjectValidator;
 use Prettus\Validator\Exceptions\ValidatorException;
@@ -87,8 +88,14 @@ class ProjectService
     public function createFile(array $data){
         $project = $this->repository->skipPresenter()->find($data['project_id']);
         $projectFile = $project->files()->create($data);
+        $current = Carbon::now()->format('YmdHs'); //pega data e hora atual.
 
-        $this->storage->put($projectFile->id.".".$data['extension'], $this->filesystem->get($data['file']));
+        if($data['extension'] == 'jpeg'){
+            $manager = new ImageManager(array('driver' => 'imagick'));
+            //$thumb = $manager->make(filesystem->get($data['file']))->resize(300, 200);
+
+        }
+        $this->storage->put("ARC".$projectFile->id .$current.".".$data['extension'], $this->filesystem->get($data['file']));
 
     }
 

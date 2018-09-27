@@ -38,7 +38,7 @@ class ProjectFileController extends Controller
     public function index()
     {
         //return $this->repository->all();
-        return $this->repository->findWhere(['owner_id' => \Authorizer::getResourceOwnerId()]);
+        return $this->repository->findWhere(['owner_id' => auth()->user()->getAuthIdentifier()]);
     }
 
     /**
@@ -51,13 +51,11 @@ class ProjectFileController extends Controller
     {
         $file = $request->file('file');
         $extension = $file->getClientOriginalExtension();
-
         $data['file'] = $file;
         $data['extension'] = $extension;
         $data['name'] = $request->name;
         $data['description'] = $request->description;
         $data['project_id'] = $request->project_id;
-
         $this->service->createFile($data);
 
     }
