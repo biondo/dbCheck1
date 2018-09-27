@@ -23,7 +23,7 @@ class UserService
 
     private $validator;
 
-    public function __construct(UserRepositoryEloquent $repository, UserValidator $validator)
+    public function __construct(UserRepository $repository, UserValidator $validator)
     {
         $this->repository = $repository;
         $this->validator = $validator;

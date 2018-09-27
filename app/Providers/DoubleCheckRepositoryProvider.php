@@ -27,9 +27,23 @@ class DoubleCheckRepositoryProvider extends ServiceProvider
      */
     public function register()
     {
-        $this->app->bind(ClientRepository::class, ClientRepositoryEloquent::class);
-        $this->app->bind(ProjectRepository::class, ProjectRepositoryEloquent::class);
-        $this->app->bind(\DoubleCheck\Repositories\ProjectNoteRepository::class, \DoubleCheck\Repositories\ProjectNoteRepositoryEloquent::class);
+        $this->app->bind(
+            UserRepository::class,
+            UserRepositoryEloquent::class
+        );
+
+        $this->app->bind(
+            ClientRepository::class,
+            ClientRepositoryEloquent::class
+        );
+        $this->app->bind(
+            ProjectRepository::class,
+            ProjectRepositoryEloquent::class
+        );
+        $this->app->bind(
+            \DoubleCheck\Repositories\ProjectNoteRepository::class,
+            \DoubleCheck\Repositories\ProjectNoteRepositoryEloquent::class
+        );
 
     }
 }

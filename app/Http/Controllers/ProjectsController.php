@@ -48,19 +48,9 @@ class ProjectsController extends Controller
      */
     public function index()
     {
-        $this->repository->pushCriteria(app('Prettus\Repository\Criteria\RequestCriteria'));
         //Só retorna os projetos relacionados ao usuario logado.
-        $projects = $this->repository->findWhere(['owner_id' => auth()->user()->getAuthIdentifier()]);
-        //$projects = $this->repository->all();
-        if (request()->wantsJson()) {
 
-            return response()->json([
-                'data' => $projects,
-            ]);
-        }
-
-        return $projects;
-            //view('projects.index', compact('projects'));
+        return $this->repository->findWhere(['owner_id' => auth()->user()->getAuthIdentifier()]);
     }
 
     /**
@@ -112,10 +102,10 @@ class ProjectsController extends Controller
      */
     public function show($id)
     {
-        $userId = auth()->user()->getAuthIdentifier();
-        if($this->repository->isOwner($id, $userId) == false)
+        if($this->checkProjectPermissions($id) == false)
         {
-            return ['message' => false];
+            return ['message' => 'Access denied!',
+            'status' => false];
         }
         return $this->repository->find($id);
 
@@ -188,19 +178,15 @@ class ProjectsController extends Controller
      */
     public function destroy($id)
     {
-       /* $deleted = $this->repository->delete($id);
+       if($this->checkProjectPermissions($id) == false) {
+           return [
+               'message' => 'Access denied!',
+               'status' => false
+           ];
+       }
+           return $this->repository->delete($id);
 
-        if (request()->wantsJson()) {
 
-            return response()->json([
-                'message' => 'Project deleted.',
-                'deleted' => $deleted,
-            ]);
-        }
-
-        return redirect()->back()->with('message', 'Project deleted.');*/
-
-       return $this->repository->delete($id);
     }
 
     private function CheckProjectOwner($projectId){
@@ -213,6 +199,10 @@ class ProjectsController extends Controller
         return $this->repository->hasMember($projectId, $userId);
     }
 
+    /**
+     * @param $projectId
+     * @return bool
+     */
     private function CheckProjectPermissions($projectId){
         if ($this->CheckProjectOwner($projectId) or $this->CheckProjectMember($projectId)) {
             return true;

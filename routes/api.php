@@ -50,7 +50,7 @@ Route::group(['middleware' => 'jwt'], function () {
         Route::put('{id}/note/{noteId}', 'ProjectNotesController@update');
         Route::delete('note/{id}', 'ProjectNotesController@destroy');
 
-       // Route::post('{id}/file', 'ProjectFileController@store');
+        Route::post('{id}/file', 'ProjectFileController@store');
 
     });
 

@@ -31,7 +31,7 @@ class UserController extends Controller
      * @param UserRepository $repository
      * @param UserService $service
      */
-    public function __construct(UserRepositoryEloquent $repository, UserService $service)
+    public function __construct(UserRepository $repository, UserService $service)
     {
         $this->repository = $repository;
         $this->service = $service;

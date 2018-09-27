@@ -2,6 +2,7 @@
 
 namespace DoubleCheck\Repositories;
 
+use DoubleCheck\Presenters\ProjectPresenter;
 use Prettus\Repository\Eloquent\BaseRepository;
 use Prettus\Repository\Criteria\RequestCriteria;
 use DoubleCheck\Repositories\ProjectRepository;
@@ -61,6 +62,12 @@ class ProjectRepositoryEloquent extends BaseRepository implements ProjectReposit
             }
         }
         return false;
+    }
+
+    public function presenter()
+    {
+        //return parent::presenter();
+        return ProjectPresenter::class;
     }
     
 }

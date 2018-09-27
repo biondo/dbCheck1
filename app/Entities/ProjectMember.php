@@ -22,8 +22,8 @@ class ProjectMember extends Model implements Transformable
         'member_id',
     ];
 
-    // public function project(){
-    //   return $this->belongsTo(Project::class); //faz o relacionamento com a tabela project
-    //}
+     public function project(){
+       return $this->belongsTo(Project::class); //faz o relacionamento com a tabela project
+    }
 
 }
