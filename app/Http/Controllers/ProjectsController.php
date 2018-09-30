@@ -2,6 +2,7 @@
 
 namespace DoubleCheck\Http\Controllers;
 
+use DoubleCheck\Services\ProjectService;
 use Illuminate\Http\Request;
 
 use DoubleCheck\Http\Requests;
@@ -25,20 +26,20 @@ class ProjectsController extends Controller
     protected $repository;
 
     /**
-     * @var ProjectValidator
+     * @var ProjectService
      */
-    protected $validator;
+    protected $service;
 
     /**
      * ProjectsController constructor.
      *
      * @param ProjectRepository $repository
-     * @param ProjectValidator $validator
+     * @param ProjectService $service
      */
-    public function __construct(ProjectRepository $repository, ProjectValidator $validator)
+    public function __construct(ProjectRepository $repository, ProjectService $service)
     {
         $this->repository = $repository;
-        $this->validator  = $validator;
+        $this->service=$service;
     }
 
     /**
@@ -49,7 +50,6 @@ class ProjectsController extends Controller
     public function index()
     {
         //Só retorna os projetos relacionados ao usuario logado.
-
         return $this->repository->findWhere(['owner_id' => auth()->user()->getAuthIdentifier()]);
     }
 
@@ -59,38 +59,10 @@ class ProjectsController extends Controller
      * @param  ProjectCreateRequest $request
      *
      * @return \Illuminate\Http\Response
-     *
-     * @throws \Prettus\Validator\Exceptions\ValidatorException
      */
     public function store(ProjectCreateRequest $request)
     {
-        try {
-
-            $this->validator->with($request->all())->passesOrFail(ValidatorInterface::RULE_CREATE);
-
-            $project = $this->repository->create($request->all());
-
-            $response = [
-                'message' => 'Project created.',
-                'data'    => $project->toArray(),
-            ];
-
-            if ($request->wantsJson()) {
-
-                return response()->json($response);
-            }
-
-            return redirect()->back()->with('message', $response['message']);
-        } catch (ValidatorException $e) {
-            if ($request->wantsJson()) {
-                return response()->json([
-                    'error'   => true,
-                    'message' => $e->getMessageBag()
-                ]);
-            }
-
-            return redirect()->back()->withErrors($e->getMessageBag())->withInput();
-        }
+            return $this->service->create($request->all());
     }
 
     /**
@@ -102,72 +74,35 @@ class ProjectsController extends Controller
      */
     public function show($id)
     {
-        if($this->checkProjectPermissions($id) == false)
-        {
-            return ['message' => 'Access denied!',
-            'status' => false];
+        if ($this->checkProjectPermissions($id) == false) {
+            return [
+                'message' => 'Access denied!',
+                'status' => false
+            ];
         }
         return $this->repository->find($id);
 
     }
 
     /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  int $id
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function edit($id)
-    {
-        $project = $this->repository->find($id);
-
-        return view('projects.edit', compact('project'));
-    }
-
-    /**
      * Update the specified resource in storage.
      *
      * @param  ProjectUpdateRequest $request
-     * @param  string            $id
+     * @param  string $id
      *
      * @return Response
-     *
-     * @throws \Prettus\Validator\Exceptions\ValidatorException
      */
     public function update(ProjectUpdateRequest $request, $id)
     {
-        try {
-
-            $this->validator->with($request->all())->passesOrFail(ValidatorInterface::RULE_UPDATE);
-
-            $project = $this->repository->update($request->all(), $id);
-
-            $response = [
-                'message' => 'Project updated.',
-                'data'    => $project->toArray(),
+        if ($this->checkProjectPermissions($id) == false)
+        {
+            return [
+                'message' => 'Access denied!',
+                'status' => false
             ];
-
-            if ($request->wantsJson()) {
-
-                return response()->json($response);
-            }
-
-            return redirect()->back()->with('message', $response['message']);
-        } catch (ValidatorException $e) {
-
-            if ($request->wantsJson()) {
-
-                return response()->json([
-                    'error'   => true,
-                    'message' => $e->getMessageBag()
-                ]);
-            }
-
-            return redirect()->back()->withErrors($e->getMessageBag())->withInput();
         }
+       return $this->service->update($request->all(), $id);
     }
-
 
     /**
      * Remove the specified resource from storage.
@@ -178,23 +113,36 @@ class ProjectsController extends Controller
      */
     public function destroy($id)
     {
-       if($this->checkProjectPermissions($id) == false) {
-           return [
-               'message' => 'Access denied!',
-               'status' => false
-           ];
-       }
-           return $this->repository->delete($id);
-
-
+        if ($this->checkProjectPermissions($id) == false) {
+            return [
+                'message' => 'Access denied!',
+                'status' => false
+            ];
+        }
+        return $this->repository->delete($id);
     }
 
-    private function CheckProjectOwner($projectId){
+    public function delete($id)
+    {
+        if ($this->checkProjectPermissions($id) == false) {
+            return [
+                'message' => 'Access denied!',
+                'status' => false
+            ];
+        }
+        return $this->repository->del($id);
+    }
+
+
+
+    private function CheckProjectOwner($projectId)
+    {
         $userId = auth()->user()->getAuthIdentifier();
         return $this->repository->isOwner($projectId, $userId);
     }
 
-    private function CheckProjectMember($projectId){
+    private function CheckProjectMember($projectId)
+    {
         $userId = auth()->user()->getAuthIdentifier();;
         return $this->repository->hasMember($projectId, $userId);
     }
@@ -203,7 +151,8 @@ class ProjectsController extends Controller
      * @param $projectId
      * @return bool
      */
-    private function CheckProjectPermissions($projectId){
+    private function CheckProjectPermissions($projectId)
+    {
         if ($this->CheckProjectOwner($projectId) or $this->CheckProjectMember($projectId)) {
             return true;
         }

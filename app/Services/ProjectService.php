@@ -12,11 +12,11 @@ namespace DoubleCheck\Services;
 use Carbon\Carbon;
 use DoubleCheck\Repositories\ProjectRepository;
 use DoubleCheck\Validators\ProjectValidator;
+use Intervention\Image\ImageManager;
 use Prettus\Validator\Exceptions\ValidatorException;
 
 use Illuminate\Filesystem\Filesystem;
 use Illuminate\Contracts\Filesystem\Factory as Storage;
-
 
 
 class ProjectService
@@ -40,9 +40,12 @@ class ProjectService
      */
     private $storage;
 
-    public function __construct(ProjectRepository $repository, ProjectValidator $validator,
-        Filesystem $filesystem, Storage $storage)
-    {
+    public function __construct(
+        ProjectRepository $repository,
+        ProjectValidator $validator,
+        Filesystem $filesystem,
+        Storage $storage
+    ) {
         $this->repository = $repository;
         $this->validator = $validator;
         $this->filesystem = $filesystem;
@@ -51,19 +54,15 @@ class ProjectService
 
     public function create(array $data)
     {
-        try
-        {
+        try {
             $this->validator->with($data)->passesOrFail();
             return $this->repository->create($data);
-        }
-        catch (ValidatorException $e)
-        {
+        } catch (ValidatorException $e) {
             return [
                 'error' => true,
                 'message' => $e->getMessageBag()
             ];
         }
-
 
         //enviar email
         //disparar notificação date('Y-m-d H:i:s')
@@ -71,13 +70,10 @@ class ProjectService
 
     public function update(array $data, $id)
     {
-        try
-        {
+        try {
             $this->validator->with($data)->passesOrFail();
             return $this->repository->update($data, $id);
-        }
-        catch (ValidatorException $e)
-        {
+        } catch (ValidatorException $e) {
             return [
                 'error' => true,
                 'message' => $e->getMessageBag()
@@ -85,18 +81,36 @@ class ProjectService
         }
     }
 
-    public function createFile(array $data){
+
+    public function createFile(array $data)
+    {
         $project = $this->repository->skipPresenter()->find($data['project_id']);
-        $projectFile = $project->files()->create($data);
+        $projectFile = $project->files()->create($data); //salva objeto no banco
         $current = Carbon::now()->format('YmdHs'); //pega data e hora atual.
+        $fileNameStore = "ARC" . '_' . $projectFile->id . '_' . $current . "." . $data['extension']; //cria nome do arquivo
+        $this->storage->put($fileNameStore, $this->filesystem->get($data['file']));
+        $this->storage->put('/thumbnail/'.$fileNameStore, $this->filesystem->get($data['file']));
 
-        if($data['extension'] == 'jpeg'){
+
+        //$this->storage->put($fileNameStore, $this->filesystem->get('storage/profile_images/thumbnail/'));
+
+        //Upload File
+        //$request->file('profile_image')->storeAs('public/profile_images', $filenametostore);
+        // $request->file('profile_image')->storeAs('public/profile_images/thumbnail', $filenametostore);
+
+/*
+        if ($data['extension'] == 'jpg' || $data['extension'] == 'jpeg') {
+            $thumbnailPath = public_path('storage/app/thumbnail/' . $fileNameStore);
+            // create an image manager instance with favored driver
             $manager = new ImageManager(array('driver' => 'imagick'));
-            //$thumb = $manager->make(filesystem->get($data['file']))->resize(300, 200);
-
+            // to finally create image instances
+            $image = $manager->make($thumbnailPath)->resize(200, 200, function ($constraint) {
+                $constraint->aspectRatio();
+            });
+            $image->save($thumbnailPath);
+            echo ($data['extension']);
         }
-        $this->storage->put("ARC".$projectFile->id .$current.".".$data['extension'], $this->filesystem->get($data['file']));
-
+*/
     }
 
 }

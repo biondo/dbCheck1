@@ -46,6 +46,13 @@ class ProjectRepositoryEloquent extends BaseRepository implements ProjectReposit
         $this->pushCriteria(app(RequestCriteria::class));
     }
 
+    //Função para desativar um projeto
+    public function disable($projectId){
+        $project = $this->find($projectId);
+        $project->active = 0;
+        $project->save();
+    }
+
     public function isOwner($projectId, $userId){
         if (count($this->findWhere(['id' => $projectId, 'owner_id' => $userId]))){
             return true;

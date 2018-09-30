@@ -51,7 +51,8 @@ class UserService
 
     public function update(array $data, $id)
     {
-        try
+        return $this->repository->update($data, $id);
+       /* try
         {
             $this->validator->with($data)->passesOrFail();
             return $this->repository->update($data, $id);
@@ -62,6 +63,6 @@ class UserService
                 'error' => true,
                 'message' => $e->getMessageBag()
             ];
-        }
+        }*/
     }
 }

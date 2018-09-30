@@ -2,6 +2,7 @@
 
 namespace DoubleCheck\Http\Controllers;
 
+use DoubleCheck\Repositories\ProjectFileRepository;
 use DoubleCheck\Repositories\ProjectRepository;
 use DoubleCheck\Services\ProjectService;
 use Illuminate\Http\Request;
@@ -24,7 +25,7 @@ class ProjectFileController extends Controller
      * @param ProjectRepository $repository
      * @param ProjectService $service
      */
-    public function __construct(ProjectRepository $repository, ProjectService $service)
+    public function __construct(ProjectFileRepository $repository, ProjectFileService $service)
     {
         $this->repository = $repository;
         $this->service = $service;

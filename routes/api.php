@@ -39,7 +39,10 @@ Route::group(['middleware' => 'jwt'], function () {
     // Protected routes
     Route::resource('client', 'ClientController', ['except' =>['create', 'edit']]);
     Route::resource('project', 'ProjectsController', ['except' => ['create', 'edit']]);
-    Route::resource('user', 'UserController', ['except' => ['create', 'edit']]);
+    //Route::resource('user', 'UserController', ['except' => ['create', 'edit']]);
+    Route::get('user/{id}', 'UserController@show');
+    Route::get('user', 'UserController@index');
+    Route::post('user/{id}', 'UserController@update');
     //Route::get('user', 'UserController@index');
 
     Route::group(['prefix'=>'project'], function(){
@@ -51,6 +54,7 @@ Route::group(['middleware' => 'jwt'], function () {
         Route::delete('note/{id}', 'ProjectNotesController@destroy');
 
         Route::post('{id}/file', 'ProjectFileController@store');
+        Route::get('file', 'ProjectFileController@index');
 
     });
 
